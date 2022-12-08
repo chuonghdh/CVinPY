@@ -21,3 +21,18 @@ def adapt_PNG(the_PNG):
 def adapt_image(the_img):
     return np.uint8(np.clip(the_img.round(), 0, 255))  # step 3, 4, 5
 
+def RGB_to_grayscale(RGB_pic):
+    rows, cols, temp = np.shape(RGB_pic)
+    gs = np.zeros((rows, cols))
+    for i in range(rows):
+        for j in range(cols):
+            gs[i, j] = np.average(RGB_pic[i, j])
+    return gs
+
+def grayscale_to_BW(grayscale_pic, threshold):
+    rows, cols = np.shape(grayscale_pic)
+    BW_pic = np.zeros((rows, cols))
+    for i in range(rows):
+        for j in range(cols):
+            BW_pic[i, j] = 0 if grayscale_pic[i, j] <= threshold else 255
+    return BW_pic
