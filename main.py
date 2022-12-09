@@ -233,10 +233,111 @@ def from_color_to_black_and_white():
     return 0
 
 
+def filters():
+    pic_name = ['field.jpg', 'workers.jpg', 'face.jpg', 'penguins.jpg']
+    img = plt.imread("venv/Exercise Files/Ch04/04_03/" + pic_name[3])
+    '''PART 01 - BLUR FILTERS
+    # Average blur
+    k_size = 15
+    kernel = np.ones((k_size, k_size), np.float32)/(k_size*k_size)
+    average = cv2.filter2D(src=img, ddepth=-1, kernel=kernel)  # ddepth = -1 giữ nguyên data type của src
+
+    # Median blur
+    median = cv2.medianBlur(img, k_size)  # with kernel size = k_size x k_size
+   '''
+    # Gaussian blur
+    k_size = 3
+    gaussian = cv2.GaussianBlur(img, (k_size, k_size), cv2.BORDER_DEFAULT)
+    img = gaussian
+    '''
+    # Display
+    rcParams['figure.figsize'] = [30, 15]
+    fig, ax = plt.subplots(2, 3)
+    ax[0][0].imshow(average), ax[0][0].set_title('average blur'), ax[0][0].set(xticks=[], yticks=[])
+    ax[0][1].imshow(median), ax[0][1].set_title('median blur'), ax[0][1].set(xticks=[], yticks=[])
+    ax[0][2].imshow(gaussian), ax[0][2].set_title('Gaussian blur'), ax[0][2].set(xticks=[], yticks=[])
+
+    ax[1][0].imshow(average[:400, 800:]), ax[1][0].set_title('avg right zoom'), ax[1][0].set(xticks=[], yticks=[])
+    ax[1][1].imshow(median[:400, 800:]), ax[1][1].set_title('med right zoom'), ax[1][1].set(xticks=[], yticks=[])
+    ax[1][2].imshow(gaussian[:400, 800:]), ax[1][2].set_title('gau right zoom'), ax[1][2].set(xticks=[], yticks=[])
+
+    plt.show()
+    '''
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+
+    ker_vr = np.matrix( [[1, 0, -1],
+                            [2, 0, -2],
+                            [1, 0, -1]])
+    ker_vl = np.flip(ker_vr, 1)
+    ker_hu = np.matrix( [[1, 2, 1],
+                            [0, 0, 0],
+                           [-1,-2,-1]])
+    ker_hd = np.flip(ker_hu, 0)
+
+    edges_vr = cv2.filter2D(src=img, ddepth=-1, kernel=ker_vr)
+    edges_vl = cv2.filter2D(src=img, ddepth=-1, kernel=ker_vl)
+    edges_ver = cv2.add(edges_vr, edges_vl)
+
+    edges_hu = cv2.filter2D(src=img, ddepth=-1, kernel=ker_hu)
+    edges_hd = cv2.filter2D(src=img, ddepth=-1, kernel=ker_hd)
+    edges_hor = cv2.add(edges_hu, edges_hd)
+
+    edges_all = cv2.add(edges_ver, edges_hor)
+
+    # Turn it into black and white
+    (thresh, blackAndWhiteImage) = cv2.threshold(edges_all, 127, 255, cv2.THRESH_BINARY)
+    # blackAndWhiteImage = cv2.adaptiveThreshold(edges_all, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 5)
+    # blackAndWhiteImage = cv2.adaptiveThreshold(edges_all, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 33, 2)
+
+    # Display
+    #rcParams['figure.figsize'] = [30, 15]
+    #fig, ax = plt.subplots(2, 3)
+    #ax[0][0].imshow(edges_vr, cmap='gray'), ax[0][0].set_title('vertical Sobel from Right'), ax[0][0].set(xticks=[], yticks=[])
+    #ax[0][1].imshow(edges_vl, cmap='gray'), ax[0][1].set_title('vertical Sobel from Left'), ax[0][1].set(xticks=[], yticks=[])
+    #ax[0][2].imshow(edges_ver, cmap='gray'), ax[0][2].set_title('vertical Sobel from R&L'), ax[0][2].set(xticks=[], yticks=[])
+    #ax[1][0].imshow(edges_hu, cmap='gray'), ax[1][0].set_title('vertical Sobel from Up'), ax[1][0].set(xticks=[], yticks=[])
+    #ax[1][1].imshow(edges_hd, cmap='gray'), ax[1][1].set_title('vertical Sobel from Down'), ax[1][1].set(xticks=[], yticks=[])
+    #ax[1][2].imshow(edges_hor, cmap='gray'), ax[1][2].set_title('vertical Sobel from U&D'), ax[1][2].set(xticks=[], yticks=[])
+
+    gs_kw = dict(width_ratios=[2, 1.2, 1, 1], height_ratios=[1, 1])
+    fig, axd = plt.subplot_mosaic([['up_left', 'up_right1', 'up_right2', 'up_right3'],
+                                   ['do_left', 'do_right1', 'do_right2', 'do_right3']],
+                                  gridspec_kw=gs_kw, figsize=(10, 4),
+                                  layout="constrained")
+    axd['up_left'].imshow(edges_all, cmap='gray'), \
+        axd['up_left'].set_title('Sobel Edge Detection - Gray'), \
+        axd['up_left'].set(xticks=[], yticks=[])
+    axd['do_left'].imshow(cv2.bitwise_not(blackAndWhiteImage), cmap='gray'), \
+        axd['do_left'].set_title('Sobel Edge Detection - B&W'), \
+        axd['do_left'].set(xticks=[], yticks=[])
+    axd['up_right1'].imshow(edges_ver, cmap='gray'), \
+        axd['up_right1'].set_title('Sobel Edge Vertical'), \
+        axd['up_right1'].set(xticks=[], yticks=[])
+    axd['up_right2'].imshow(edges_vr, cmap='gray'), \
+        axd['up_right2'].set_title('Vertical from Right'), \
+        axd['up_right2'].set(xticks=[], yticks=[])
+    axd['up_right3'].imshow(edges_vl, cmap='gray'), \
+        axd['up_right3'].set_title('Vertical from Left'), \
+        axd['up_right3'].set(xticks=[], yticks=[])
+    axd['do_right1'].imshow(edges_hor, cmap='gray'), \
+        axd['do_right1'].set_title('Sobel Edge Horizontal'), \
+        axd['do_right1'].set(xticks=[], yticks=[])
+    axd['do_right2'].imshow(edges_hu, cmap='gray'), \
+        axd['do_right2'].set_title('Horizontal from Up'), \
+        axd['do_right2'].set(xticks=[], yticks=[])
+    axd['do_right3'].imshow(edges_hd, cmap='gray'), \
+        axd['do_right3'].set_title('Horizontal from Down'), \
+        axd['do_right3'].set(xticks=[], yticks=[])
+
+    plt.show()
+
+    return 0
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     # test_environment()
     # basics_of_image_processing()
-    from_color_to_black_and_white()
+    # from_color_to_black_and_white()
+    filters()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
